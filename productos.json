@@ -1,0 +1,4 @@
+[
+    { "id": 1, "nombre": "Pastel de zanahoria", "precio": 7.60, "imagen": "imagenes/pastel.png" },
+    { "id": 2, "nombre": "Yogur cremoso", "precio": 5.00, "imagen": "imagenes/yogur.png" }
+]

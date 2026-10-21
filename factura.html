@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Facturación Interno</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .invoice-box { max-width: 500px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .totals { margin-top: 20px; padding-top: 15px; border-top: 2px dashed #eee; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; }
+        .grand-total { font-weight: bold; color: #27ae60; font-size: 1.2rem; }
+        .btn-submit { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .btn-submit:hover { background-color: #219653; }
+    </style>
+</head>
+<body>
+
+<div class="invoice-box">
+    <h2>🧾 Nueva Factura</h2>
+    
+    <form id="factura-form">
+        <!-- Datos del Cliente -->
+        <div class="form-group">
+            <label>Nombre del Cliente:</label>
+            <input type="text" placeholder="Ej. Juan Pérez" required>
+        </div>
+        <div class="form-group">
+            <label>Identificación / RUC / Cédula:</label>
+            <input type="text" placeholder="9999999999" required>
+        </div>
+
+        <!-- Datos Automáticos del Producto (Bloqueados para evitar alteraciones) -->
+        <div class="form-group">
+            <label>Producto a Facturar:</label>
+            <input type="text" id="prod-nombre" readonly style="background-color: #f9f9f9;">
+        </div>
+        <div class="form-group">
+            <label>Cantidad:</label>
+            <input type="number" id="prod-cantidad" value="1" min="1" required>
+        </div>
+
+        <!-- Totales Calculados -->
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="txt-subtotal">\$0.00</span>
+            </div>
+            <div class="total-row">
+                <span>IVA (15%):</span>
+                <span id="txt-iva">\$0.00</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total a Cobrar:</span>
+                <span id="txt-total">\$0.00</span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Procesar y Emitir Factura</button>
+    </form>
+</div>
+
+<script>
+    // 🧠 Lógica para leer los datos del QR (Parámetros de la URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const idProducto = urlParams.get('id');
+    const nombreProducto = urlParams.get('nombre');
+    const precioBase = parseFloat(urlParams.get('precio')) || 0;
+
+    // Asignar los datos del producto al formulario
+    document.getElementById('prod-nombre').value = nombreProducto ? decodeURIComponent(nombreProducto) : "Producto Desconocido";
+
+    const inputCantidad = document.getElementById('prod-cantidad');
+    const porcentajeIVA = 0.15; // Ajusta según el impuesto vigente de tu región (ej: 0.15 para el 15%)
+
+    function calcularValores() {
+        const cantidad = parseInt(inputCantidad.value) || 1;
+        const subtotal = precioBase * cantidad;
+        const iva = subtotal * porcentajeIVA;
+        const total = subtotal + iva;
+
+        // Mostrar en pantalla
+        document.getElementById('txt-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('txt-iva').innerText = `$${iva.toFixed(2)}`;
+        document.getElementById('txt-total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    // Escuchar cambios en la cantidad de productos
+    inputCantidad.addEventListener('input', calcularValores);
+
+    // Calcular valores iniciales al cargar la página
+    calcularValores();
+
+    // Guardar o enviar la factura
+    document.getElementById('factura-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert(`¡Factura procesada con éxito!\nProducto ID: ${idProducto}\nTotal Cobrado: ${document.getElementById('txt-total').innerText}`);
+        // Aquí puedes conectar tu Fetch() hacia tu base de datos propia para almacenar la venta de forma permanente
+    });
+</script>
+
+</body>
+</html>
